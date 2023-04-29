@@ -1,0 +1,30 @@
+config:
+  target: "https://dog.ceo"
+  phases:
+    - duration: 20
+      arrivalRate: 6
+      name: Dog API Stress test
+  plugins:
+    ensure: {}
+  ensure:
+    thresholds:
+      - http.response_time.p50: 20
+      - http.response_time.p99: 250
+      - http.response_time.p95: 1000
+    conditions:
+      - expression: "http.request_rate >= 3 and http.response_time.max < 700"
+  payload:
+      - path: "breed.csv"
+        fields:
+          - "breed"
+        order: sequence
+scenarios:
+  - name: "Dog API Test"
+    flow:
+      - get:
+          url: "{{ target }}/api/breeds/image/random"
+          name: "Get Random Dog Image"
+      - post:
+          url: "{{ target }}/api/breed/{{ breed }}/images/random"
+          name: "Get Random Dog Image By Breed"
+    
